@@ -1,0 +1,27 @@
+name: ebay_api_config
+
+# Trading API Sandbox - https://www.x.com/developers/ebay/products/trading-api
+api.sandbox.ebay.com:
+    compatability: 719
+    appid: vladslav-ProfitFi-SBX-25d7a0307-112e9d05
+    certid: SBX-5d7a0307f335-b4c1-4180-874a-50b8
+    devid: 75f22fdc-442c-4342-afed-59fdb8b74bb7
+    token: AgAAAA**AQAAAA**aAAAAA**WQcnWg**nY+sHZ2PrBmdj6wVnY+sEZ2PrA2dj6wFk4GmCJKEogmdj6x9nY+seQ**EGgEAA**AAMAAA**/a8UMuHaIf5tZzLPiHMNvdkAt34J7gWOc32wvyOlk0bVUcLQavDgr6l1afAxKSL7HfcTsfEO0quD/BWQy+xAZ0FuuXXx074m0vJxUcMkqo6V+LuFaXI/fe+vGgcb8zf3zsr9gS0lrOYgGdvR/gMxrLnuD+AvTczjBiJrGBhTn2HxXIeqW4hLdkUXsSHc6/r98uSpof4or/qKgVHXfdoDrbDDq3ucPLllR4ZRrC3KHuUYBTI5IxtBKyJCyBBvBTGemvp42i8aNLjsNccTcUkzMLHXaORHmme8qCFljDd3+yh4diAt6IIOQkhuY7Ofqz/9Tuvp0pq2h5+eKIGcxJHKvm4LGFrjH6T7goKgk6MVWNvK/MqOFBToSb/RwuDng/MVgJTSjAjeZvGvLDhFG+hpCzMVZhNMh+JNSCHEadgOUbpQXfKMl7ViAm0THhzrR+1m2xWgtPMJ/DnjYNGQvntoZbsgor9ieg5CvHmkr4mR3sd/syvLBveCLWCH+NYaVBn/DMJITtuwNeGSoS1P0gvo8WuRT4j/kzcODMs/En93UEOMwt/Derm3XZFkBKQpLdBCSiA21JE/DVS7Ej9ieGELeR1tNjqiWbQs6OO8sDRVSOTT3qdcmsJyItRigAkHWaONgy4WBTiWTm2D1DFXpbRTuiZ8NfapWroQpFaon+fbioHg9n6tGxSimqqsciO9HTvU96B5XYPSR4mP8TJgUG/wQrVy3QHnK2h8DvoDBkdCjC1Ku1kPhPF5jY84kP9kmYZO
+
+# Trading API - https://www.x.com/developers/ebay/products/trading-api
+api.ebay.com:
+    compatability: 719
+    appid: vladslav-ProfitFi-PRD-45d7a0307-3aac9ccd
+    certid: PRD-5d7a03075037-a4dd-4519-9222-c1cc
+    devid: 75f22fdc-442c-4342-afed-59fdb8b74bb7
+    token: AgAAAA**AQAAAA**aAAAAA**WQonWg**nY+sHZ2PrBmdj6wVnY+sEZ2PrA2dj6AEl4enCJeApwWdj6x9nY+seQ**AQoEAA**AAMAAA**PlcWqgnpWV1Hje78H16R03eO/iOGr51dwqmoIdh2U1Im3Wh/lSB24d/ZLEFBbhIz3NBZO7wiZqQ60rtQNmF8yXe3UHD+o19Ao4/TpyOoOc6gDXSm4BR/z4NwEN1GEtTh9zGh8Uc+pPsW6I2/8e1EU583bsmo6OJk0Q8/LMCB9FDxyUc21N4ZNm6xNvKkQaWYjzILv0sH0as1x6A75BvuzIQpo2wnwtceZw3PCZpohtqiFOCJIUbvz/1C5tasfdhq/U309RN6S8+W7COcP9CRM51tbg5sN9ORyDd/jXAKWb28lbiDLUIc2I8LJj6nixArWwbUgGytig73pOnhmKNrkimEg5dhk+KFh/7hq1J6jamU0jCl4QGJsz/Dh9jVmH0lin9ST+ibgoehkqdA0VSa2ZNuH3rTUWkfCZxliKJrsFnZXf/HxQWTa13B3Cj/xFbn2FpoFdoMPOvKnyjqaKopjpU+X20IqaGpca0xZ0fK8025gTOHk+W7Hg/CXtphQ0WJVK+0ElfxYG4uhj8+0G/HhCscdr+8XHVq4D+LU+xiuKj6Oxo7epwPPppX6Z9vDjuOJmR9BS7S3lO1ait7F3yG6kdOxfyyW9Oo3Y5wtUza2O1yE2g4OBsoE4RzcgocilAnwyHnc+BP/F847OuLaWYTCDOVd86BI9dQ8mJzPKvN2+k264u5YUd1UeJL11zCRgatvWB40oI0ZL7kQG+9Fjf63FZxEO9kR8r3HRj4Ty/PrM0BPCGlT6c4MhdvYpozX9IW
+
+# Finding API - https://www.x.com/developers/ebay/products/finding-api
+svcs.ebay.com:
+    appid: vladslav-ProfitFi-PRD-45d7a0307-3aac9ccd
+    version: 1.7.0
+
+# Shopping API - https://www.x.com/developers/ebay/products/shopping-api
+open.api.ebay.com:
+    appid: vladslav-ProfitFi-PRD-45d7a0307-3aac9ccd
+    version: 671
