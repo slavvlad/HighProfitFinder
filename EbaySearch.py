@@ -242,6 +242,7 @@ def perfome_ebay_search(category_id, page_index,mode,num_days,item_id, opts):
                 perfome_ebay_search(category_id,page_index,mode,num_days,item_id,opts)
         except:
             return  None
+    print "ok"
     return  response.dict() if response!= None else None
 
 
