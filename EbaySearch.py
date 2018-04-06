@@ -52,39 +52,47 @@ def FindCompletedItems(opts):
     strDoesNotApply = 'Does not apply'
     global_category={
     'kids':['116652','28145','176988','220','2984'],
+        'cell_phone':['15032','42428','43304','9394','9355'],
     'kitchen':['20635','20625','20651','25357','25367','11874'],
     'baby_swig':['2990'],
-    'pet':['1281','301','21097','1335','10823','48947','10823','47178','168213'],
-    'home_and_garden':['11700','163008','163058','165253','13905','159907'],
+    'pet':['1281','301','21097','1335','10823','48947','10823','47178','168213','177801','20742','26696','20734','116391','48760','20737'],
+    'home_and_garden':['11700','163008','163058','165253','13905','159907','20710','14308','159912','181076','31605','26677','16086','3197','10033','20444'],
+    'home_automation': ['50583', '50582'],
     'headphones':['15052'],
+    'coupons': ['172008','31411'],
+    'health_buity': ['31769', '11863','180345','11838','1277','11854','29585','11848','112661'],
     'garden_supplies':['2032'],
-    'lamps':['112581'],
+    'sport': ['159134','7301','1492'],
+    'lamps':['112581','20697'],
+    'Computers': ['183062','31530','176970'],
+    'video_games_console':['1249','139971'],
     #'organizers':['180915','146399','10321','168159'],
-    'baby_gear':['100223'],
     'jewelry_and_watches':['98863','165254','39541','165670','165695','165703','47122'],
-    'toys_hobbies':['220'],
-    'baby':['100223','20433','2984'],
-    'books':['171276','11104','46752','268'],
+    'toys_hobbies':['220','2616','233','436','49019','246','28179','183446','19016','2536','45455'],
+    'baby':['100223','20433','2984','100982','100223','48757','66698','45455','20394','19068','37631','117388','66697','66692'],
+    'books':['171276','11104','46752','268','171485'],
     #'valentines':['70978','170097'],
     'electronics':['3270','60207','14948','7294'],
     'fitness':['888','15273','40892','40883','28065','44075','44076','13362'],
     'dvd':['11232','617','46760'],
-    'drone':['179697','182969'],
+    'Gadgets': ['14948'],
+    'drone':['179697','182969','182969'],
     #'valentines_day':['70978','35892','170097','907'],
     'threeD_supplies':['183062'],
     'jewelry_watches':['281'],
     'smart_assistent':['184435'],
-    'camera':['625','15200','73459','150044','3326','27432','104058','11827'],
+    'camera':['625','15200','73459','150044','3326','27432','104058','11827','31388','78997','30090','11724'],
     'bushes_and_shrubs':['3185']}
     profit= 2 #$
     #profitToSearch=5
     profitFoundCount=0
     soldMoreThan=2
     pageIndex=0
-    pageIndexMax=3
+    pageIndexMax=4
     days=10
     counter=0
     itemIdList=from_file()
+    amazon = AmazonAPI('AKIAJNSPI6YF2GJ6A5HA', 'hMSoDB9E0CkMSuQsuUU5fenIaysaqMup7YPvWnDr', 'slavvlad-20', region="US")
 
     while True:
         for key, value in global_category.iteritems():
@@ -92,7 +100,8 @@ def FindCompletedItems(opts):
                 for pageIndex in range(1, pageIndexMax):
 
                     dic = perfome_ebay_search(categoryId, pageIndex,ebay_search.finding,7,None,opts)
-
+                    if dic==None:
+                        continue
 
                     if  dic.get('searchResult') == None or ('_count' in dic['searchResult'] and int(dic['searchResult']['_count'])==0):
                         #Print ('where are no more result for current criteria.Prifits fount %s. Page index %s' % (profitFoundCount,pageIndex))
@@ -102,19 +111,20 @@ def FindCompletedItems(opts):
                     #api = FindItem(debug=opts.debug, consumer_id=opts.appid, config_file=opts.yaml)
 
 
-                    amazon = AmazonAPI('AKIAJNSPI6YF2GJ6A5HA', 'hMSoDB9E0CkMSuQsuUU5fenIaysaqMup7YPvWnDr', 'slavvlad-20',region="US")
+
 
                     if 'item' not in  dic['searchResult']:
-                        continue #there are not relevant product
+                        continue #therreque are not relevant product
                     for item in dic['searchResult']['item']:
                         if item['itemId'] in itemIdList and date.today()< datetime.datetime.strptime(itemIdList[item['itemId']], '%Y-%m-%d').date() + datetime.timedelta(days=days):
                             continue
                         itemIdList[item['itemId']]= str(date.today())
                         to_file(itemIdList)
                         counter=counter+1
-                        #transation = api.execute('GetItemTransactions',{'NumberOfDays': 7,'ItemID': item['itemId']}).dict()
                         try:
                             transation = perfome_ebay_search(categoryId,pageIndex,ebay_search.trading, days, item['itemId'], opts)
+                            if transation==None:
+                                continue
                         except:
                             #e = sys.exc_info()[1]
                             #Print('GetItemTransactions failed due to the next reason %s\n'% e)
@@ -122,6 +132,8 @@ def FindCompletedItems(opts):
                         if int(transation['PaginationResult']['TotalNumberOfEntries'])>soldMoreThan:
                             try:
                                 itemDetails = perfome_ebay_search(categoryId,pageIndex,ebay_search.GetDetails,days,item['itemId'],opts)
+                                if itemDetails == None:
+                                    continue
                             except:
                                 #e = sys.exc_info()[1]
                                 #Print('\nGetItem failed due to the next reason %s\n'% e)
@@ -154,22 +166,28 @@ def FindCompletedItems(opts):
                                 try:
                                     if upc:# if the upc is not empty
                                         product = amazon.lookup(IdType='UPC',ItemId=upc, SearchIndex='All') #,ResponseGroup='Offers,Small'
-                                        amazonPrise=calculate_profit(transDetails['value'],product,profit)
-                                        if amazonPrise>0:
+                                        revenue, amazonFinalProduct=calculate_profit(transDetails['value'],product,profit)
+                                        if revenue>0:
                                             profitFoundCount=profitFoundCount+1
                                             #print colored("Amazon Asin(%s) prise (%s)\n Amazon Title - %s" % (product.asin, amazonPrise,product.title),'red')
                                             #Print ("Amazon Asin(%s) prise (%s)\n Amazon Title - %s\nProfit found index - %s" % (product.asin, amazonPrise,product.title,profitFoundCount))
-                                            Print("Profits %s index found %s\nEbay ID\n%s\nASIN\n%s\nUPC\n%s\nEbay Title\n %s\nAmazon Title\n %s\n-----------------"% (amazonPrise,profitFoundCount,item['itemId'],product.asin,product.upc,item['title'],product.title))
+                                            Print("Profits %s index found %s\nEbay(%s$)\n%s\nAmazon (%s$)\n%s\nUPC\n%s\nEbay Title\n %s\nAmazon Title\n %s\n-----------------"% (revenue,profitFoundCount,transDetails['value'],item['itemId'],amazonFinalProduct.price_and_currency[0],amazonFinalProduct.asin,amazonFinalProduct.upc,item['title'],amazonFinalProduct.title))
+
 
                                 except:
+
                                     if ISBN:# if the upc is not empty
                                         try:
                                             product = amazon.lookup(IdType='ISBN',ItemId=ISBN, SearchIndex='All')
-                                            amazonPrise=calculate_profit(transDetails['value'],product,profit)
-                                            if amazonPrise>0:
+                                            revenue, amazonFinalProduct=calculate_profit(transDetails['value'],product,profit)
+                                            if revenue>0:
                                                 profitFoundCount=profitFoundCount+1
                                                 #Print ("Amazon ISBN(%s) prise (%s)\n Amazon Title - %s\nProfit found index - %s" % (ISBN, amazonPrise,product.title,profitFoundCount))
-                                                Print("Profits %s index found %s\nEbay ID\n%s\nASIN\n%s\nUPC\n%s\nEbay Title\n %s\nAmazon Title\n %s\n-----------------" % (amazonPrise, profitFoundCount, item['itemId'], product.asin, product.upc, item['title'], product.title))
+                                                Print(
+                                                    "Profits %s index found %s\nEbay(%s$)\n%s\nAmazon (%s$)\n%s\nUPC\n%s\nEbay Title\n %s\nAmazon Title\n %s\n-----------------" % (
+                                                    revenue, profitFoundCount, transDetails['value'], item['itemId'],
+                                                    amazonFinalProduct.price_and_currency[0], amazonFinalProduct.asin,
+                                                    amazonFinalProduct.upc, item['title'], amazonFinalProduct.title))
                                         except:
                                             Print( "cannot fine %s UPC %s ISBN on Amazon" % (upc,ISBN))
 
@@ -180,7 +198,9 @@ def FindCompletedItems(opts):
                                 Print(e)
 
 def perfome_ebay_search(category_id, page_index,mode,num_days,item_id, opts):
+    response=None
     try:
+
         if mode==ebay_search.finding :
             api = finding(siteid='EBAY-US', config_file=opts.yaml, appid=opts.appid)
             response = api.execute('findCompletedItems', {
@@ -214,12 +234,15 @@ def perfome_ebay_search(category_id, page_index,mode,num_days,item_id, opts):
                           warnings=True, timeout=20)
             response = api.execute('GetItem',{'ItemID':item_id,'IncludeItemSpecifics':'true'})
     except:
-        e = sys.exc_info()[1]
-        if e.response._dict['Errors']['ErrorCode'] == '518':  # riched daily limit
-            Print( str(datetime.datetime.now()) + " reached daily request limits. Going to sleep for one hour" )
-            time.sleep(60 * 60)  # waiting for 1 hour
-            perfome_ebay_search(category_id,page_index,mode,num_days,item_id,opts)
-    return  response.dict()
+        try:
+            e = sys.exc_info()[1]
+            if e != None and e.response!= None and e.response._dict['Errors']['ErrorCode'] == '518':  # riched daily limit
+                Print( str(datetime.datetime.now()) + " reached daily request limits. Going to sleep for one hour" )
+                time.sleep(60 * 60)  # waiting for 1 hour
+                perfome_ebay_search(category_id,page_index,mode,num_days,item_id,opts)
+        except:
+            return  None
+    return  response.dict() if response!= None else None
 
 
 def calculate_profit(ebay_prise,amazon, profit):
@@ -241,7 +264,7 @@ def calculate_profit(ebay_prise,amazon, profit):
                 #profitFoundCount=profitFoundCount-1
             #print colored('The profit is (%s)' % ((ebay_prise)-amazon_prise -fees), 'red' )
             #Print ('The profit is {}'.format((ebay_prise-amazon_prise -fees)))
-            return (ebay_prise-amazon_prise -fees)
+            return (ebay_prise-amazon_prise -fees),amazonTuple
 
         #elif amazon_prise +fees<ebay_prise:
             #print colored('The profit is %s' % (ebay_prise-amazon_prise -fees), 'blue' )
@@ -250,7 +273,7 @@ def calculate_profit(ebay_prise,amazon, profit):
         #Print ("Amazon Asin(%s) prise (%s)\nAmazon Title - %s" % (amazonTuple.asin, amazon_prise,amazonTuple.title))
     except:
         print "Unexpected error:", sys.exc_info()[0]
-    return result
+    return result,amazonTuple
 
 def AdvansedSearch(opt,product_id):
     try:
