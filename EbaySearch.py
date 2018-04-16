@@ -1,6 +1,8 @@
 __author__ = 'vladi'
 
 import sys
+import Loger
+import logging
 from optparse import OptionParser
 import ebaysdk
 from ebaysdk.finding import Connection as finding
@@ -14,6 +16,7 @@ import json
 import time
 import os.path
 import datetime
+from logging.handlers import RotatingFileHandler
 
 fileName= "Result/Output%s.txt" % time.time()
 print fileName
@@ -51,7 +54,8 @@ def from_file(tfile='State.json'):
 def FindCompletedItems(opts):
     strDoesNotApply = 'Does not apply'
     global_category={
-    'kids':['116652','28145','176988','220','2984'],
+    'travel': ['71490', '80600', '42526', '13902', '3252','1310','16080','164797','164798','173521','19315','98972','164796','98968','93839','164795','58730','183477'],
+    'kids':['116652','28145','176988','220'],
         'cell_phone':['15032','42428','43304','9394','9355'],
     'kitchen':['20635','20625','20651','25357','25367','11874'],
     'baby_swig':['2990'],
@@ -69,7 +73,7 @@ def FindCompletedItems(opts):
     #'organizers':['180915','146399','10321','168159'],
     'jewelry_and_watches':['98863','165254','39541','165670','165695','165703','47122'],
     'toys_hobbies':['220','2616','233','436','49019','246','28179','183446','19016','2536','45455'],
-    'baby':['100223','20433','2984','100982','100223','48757','66698','45455','20394','19068','37631','117388','66697','66692'],
+    'baby':['100223','20433','2984','100982','48757','66698','45455','20394','19068','37631','117388','66697','66692','163009','163010','19069','117032','100224','20435','184339','117027','20434','117026','20436','117016','45454','117017','45456','20400','20408','162034','184344','20402','157325','106776','20405','117389','117390','100227','131084','179013','1261','11450','3082','163222','163226','147285','1070','172007','86895','160840','95233','160848','160866','50348'],
     'books':['171276','11104','46752','268','171485'],
     #'valentines':['70978','170097'],
     'electronics':['3270','60207','14948','7294'],
@@ -88,7 +92,7 @@ def FindCompletedItems(opts):
     profitFoundCount=0
     soldMoreThan=2
     pageIndex=0
-    pageIndexMax=4
+    pageIndexMax=3
     days=10
     counter=0
     itemIdList=from_file()
@@ -97,8 +101,8 @@ def FindCompletedItems(opts):
     while True:
         for key, value in global_category.iteritems():
             for categoryId in value:
-                for pageIndex in range(1, pageIndexMax):
-
+                for pageIndex in range(1, pageIndexMax+1):
+                    Loger.logger.info('Start to search category id {0}, page index {1}'.format(categoryId, pageIndex))
                     dic = perfome_ebay_search(categoryId, pageIndex,ebay_search.finding,7,None,opts)
                     if dic==None:
                         continue
@@ -124,8 +128,10 @@ def FindCompletedItems(opts):
                         try:
                             transation = perfome_ebay_search(categoryId,pageIndex,ebay_search.trading, days, item['itemId'], opts)
                             if transation==None:
+                                Loger.logger.info('Transaction Returned null')
                                 continue
                         except:
+                            Loger.logger.info('Exception {0}'.format(sys.exc_info()[1]))
                             #e = sys.exc_info()[1]
                             #Print('GetItemTransactions failed due to the next reason %s\n'% e)
                             continue
@@ -165,7 +171,9 @@ def FindCompletedItems(opts):
                                 #Print ("CategoryID: %s" % item['primaryCategory']['categoryId'])
                                 try:
                                     if upc:# if the upc is not empty
+                                        Loger.logger.info('execute amazon search')
                                         product = amazon.lookup(IdType='UPC',ItemId=upc, SearchIndex='All') #,ResponseGroup='Offers,Small'
+                                        Loger.logger.info('Finished to execute amazon search')
                                         revenue, amazonFinalProduct=calculate_profit(transDetails['value'],product,profit)
                                         if revenue>0:
                                             profitFoundCount=profitFoundCount+1
@@ -174,11 +182,15 @@ def FindCompletedItems(opts):
                                             Print("Profits %s index found %s\nEbay(%s$)\n%s\nAmazon (%s$)\n%s\nUPC\n%s\nEbay Title\n %s\nAmazon Title\n %s\n-----------------"% (revenue,profitFoundCount,transDetails['value'],item['itemId'],amazonFinalProduct.price_and_currency[0],amazonFinalProduct.asin,amazonFinalProduct.upc,item['title'],amazonFinalProduct.title))
 
 
+
+
                                 except:
 
                                     if ISBN:# if the upc is not empty
                                         try:
+                                            Loger.logger.info('execute amazon search')
                                             product = amazon.lookup(IdType='ISBN',ItemId=ISBN, SearchIndex='All')
+                                            Loger.logger.info('Finished to execute amazon search')
                                             revenue, amazonFinalProduct=calculate_profit(transDetails['value'],product,profit)
                                             if revenue>0:
                                                 profitFoundCount=profitFoundCount+1
@@ -195,6 +207,7 @@ def FindCompletedItems(opts):
                                 #Print( "-------------------")
                             except :
                                 e = sys.exc_info()[1]
+                                Loger.logger.info('Exception1 {0}'.format(e))
                                 Print(e)
 
 def perfome_ebay_search(category_id, page_index,mode,num_days,item_id, opts):
@@ -202,7 +215,9 @@ def perfome_ebay_search(category_id, page_index,mode,num_days,item_id, opts):
     try:
 
         if mode==ebay_search.finding :
+            Loger.logger.info('Start to execute findCompletedItems operation')
             api = finding(siteid='EBAY-US', config_file=opts.yaml, appid=opts.appid)
+
             response = api.execute('findCompletedItems', {
                 # 'keywords': 'Baby Groot Flower Pot Head Wood Planter Figure Guardians of The Galaxy 3D Print',
                 # 'keywords': 'thermal clothing',
@@ -224,25 +239,36 @@ def perfome_ebay_search(category_id, page_index,mode,num_days,item_id, opts):
                 },
                 'sortOrder': 'WatchCountDecreaseSort'
             })
+            Loger.logger.info('Finish to execute finding operation')
         elif mode == ebay_search.trading:
+            Loger.logger.info('Start to execute Trading operation')
             api = Trading(debug=opts.debug, config_file=opts.yaml, appid=opts.appid, certid=opts.certid, devid=opts.devid,
                     warnings=True, timeout=20)
             response = api.execute('GetItemTransactions',
                         {'NumberOfDays': num_days, 'IncludeVariations': 'true', 'ItemID': item_id})
+            Loger.logger.info('Finish to execute GetItemTransactions operation')
         else:
+            Loger.logger.info('Start to execute GetItemTransactions operation')
             api = Trading(debug=opts.debug, config_file=opts.yaml, appid=opts.appid, certid=opts.certid, devid=opts.devid,
                           warnings=True, timeout=20)
             response = api.execute('GetItem',{'ItemID':item_id,'IncludeItemSpecifics':'true'})
+            Loger.logger.info('Finish to execute GetItem operation')
     except:
         try:
             e = sys.exc_info()[1]
+            Loger.logger.info('exceptin occured due to the next reason: {0}'.format(e))
             if e != None and e.response!= None and e.response._dict['Errors']['ErrorCode'] == '518':  # riched daily limit
-                Print( str(datetime.datetime.now()) + " reached daily request limits. Going to sleep for one hour" )
+                text = "{0} reached daily request limits. Going to sleep for one hour".format(str(datetime.datetime.now()))
+                Print( text )
+                Loger.logger.info(text)
                 time.sleep(60 * 60)  # waiting for 1 hour
+                Loger.logger.info('Wakeup  after sleeping')
                 perfome_ebay_search(category_id,page_index,mode,num_days,item_id,opts)
         except:
+            e = sys.exc_info()[1]
+            Loger.logger.info('inner exceptin occured due to the next reason: {0}'.format(e))
             return  None
-    print "ok"
+
     return  response.dict() if response!= None else None
 
 
@@ -266,6 +292,9 @@ def calculate_profit(ebay_prise,amazon, profit):
             #print colored('The profit is (%s)' % ((ebay_prise)-amazon_prise -fees), 'red' )
             #Print ('The profit is {}'.format((ebay_prise-amazon_prise -fees)))
             return (ebay_prise-amazon_prise -fees),amazonTuple
+        else:
+            Loger.logger.info('There is no profit found. Amozon prise is {0}, Ebay prise is {1}, Fees {2}, Profit {3}, Total prise is {4}  '.format(amazon_prise, ebay_prise, fees, profit, (amazon_prise+profit +fees)))
+
 
         #elif amazon_prise +fees<ebay_prise:
             #print colored('The profit is %s' % (ebay_prise-amazon_prise -fees), 'blue' )
@@ -273,7 +302,7 @@ def calculate_profit(ebay_prise,amazon, profit):
                 #print colored("Amazon Asin(%s) prise (%s)\n Amazon Title - %s" % (product.asin, product.price_and_currency,product.title),'red')
         #Print ("Amazon Asin(%s) prise (%s)\nAmazon Title - %s" % (amazonTuple.asin, amazon_prise,amazonTuple.title))
     except:
-        print "Unexpected error:", sys.exc_info()[0]
+        Loger.logger.info('Unexpected error: {0}'.format(sys.exc_info()[0]))
     return result,amazonTuple
 
 def AdvansedSearch(opt,product_id):
